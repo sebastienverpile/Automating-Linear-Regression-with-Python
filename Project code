@@ -1,0 +1,261 @@
+#Reading Data 
+f = open('C:/Users/Sebastien Verpile/Desktop/Classes/CUS620/Project/body.dat','r')
+lines = f.readlines()
+
+#Skeletal Measurements
+
+biacromialDiam = []; biiliacDiam = []; bitrochantericDiam = []; chestDepth = []
+chestDiam =[]; elbowDiam = []; wristDiam = []; kneeDiam = []; ankleDiam = []
+
+#Girth Measurements
+
+shoulderGirth = []; chestGirth = []; waistGirth = [] ; navelGirth= []
+hipGirth = []; thighGirth = []; bicepGirth = []; forearmGirth = []
+kneeGirth = []; calfMaxgirth = []; ankleMingirth = []; wristMingirth = []
+
+#Other Measurements
+
+age = []; weight = []; height = []; BMI = [] ; gender = []# 1=Male 0=Female
+
+
+#Splitting data, creating list with each attribute
+
+for i in range(0,len(lines)):
+    biacromialDiam.append(float(lines[i][0:4]))#1
+    biiliacDiam.append(float(lines[i][5:9]))#2
+    bitrochantericDiam.append(float(lines[i][10:14]))#3
+    chestDepth.append(float(lines[i][15:19]))#4
+    chestDiam.append(float(lines[i][20:24]))#5
+    elbowDiam.append(float(lines[i][25:29]))#6
+    wristDiam.append(float(lines[i][30:34]))#7
+    kneeDiam.append(float(lines[i][35:39]))#8
+    ankleDiam.append(float(lines[i][40:44]))#9
+    shoulderGirth.append(float(lines[i][45:50]))#10
+    chestGirth.append(float(lines[i][51:56]))#11
+    waistGirth.append(float(lines[i][57:62]))#12
+    navelGirth.append(float(lines[i][63:68]))#13
+    hipGirth.append(float(lines[i][69:74]))#14
+    thighGirth.append(float(lines[i][75:79]))#15
+    bicepGirth.append(lines[i][80:84])#16
+    forearmGirth.append(float(lines[i][85:89]))#17
+    kneeGirth.append(float(lines[i][90:94]))#18
+    calfMaxgirth.append(float(lines[i][95:99]))#19
+    ankleMingirth.append(float(lines[i][100:104]))#20
+    wristMingirth.append(float(lines[i][105:109]))#21
+    age.append(round(float(lines[i][110:114])))#22
+    weight.append(float(lines[i][115:120]))#23
+    height.append(float(lines[i][121:126]))#24
+    gender.append(int(lines[i][127]))#25
+    
+################### Calculations #####################
+
+# Creating BMI function
+def bmi(w,h):
+    'This function calculates the Body Mass Index. It takes as input weight in Kg and and height in cm.'
+    W_lb = w * 2.20462 #Converting kg to Lb.
+    H_in = h * 0.393701 #Converting cm to inch. 
+    bmi = (W_lb / (H_in)**2)  * 703 
+    return round(bmi,1)
+
+#Calculating BMIs
+for w,h in zip(weight,height):
+    BMI.append(bmi(w,h))
+ 
+
+#Creating function for Peason's correlation (r)
+def corr(x,y):
+    'This function calculates the Pearson\'s correlation coefficient for two lists'
+    
+    import numpy as np #Library for mean function
+    import math as m #Library for Square Root function
+    
+    meanX = np.mean(x)
+    meanY = np.mean(y)
+    
+    XminusMean = []
+    XminusMeansquared = []
+    YminusMean = []
+    YminusMeansquared = []
+    prods = []
+    
+    for i in x:
+        XminusMean.append(i - meanX)
+    for i in y:
+        YminusMean.append(i - meanY)
+    
+    for i,j in zip(XminusMean, YminusMean):
+        prods.append(i * j)
+    
+    numerator = sum(prods)
+    
+    for i in XminusMean:
+        XminusMeansquared.append(i ** 2)
+    for i in YminusMean:
+        YminusMeansquared.append(i ** 2)
+        
+    denominator = m.sqrt(sum(XminusMeansquared)) * m.sqrt(sum(YminusMeansquared))
+    
+    corr = numerator / denominator 
+    
+    return float(round(corr,2))
+
+
+#Least Squares function for X and Y (k = 1)
+def simpleLreg(Y, X):
+    
+    'This function calculates the Least Squares regression coefficients for Univariate analysis. The First argument is the dependent variable, and the second argument is the independent variable.'
+    print()#creating space in final output 
+    import numpy as np #Library for mean function
+    
+    #Defining lists for calculations
+    XMinusmeanX = []
+    YMinusmeanY = []
+    prods = []
+    XMinusmeanXSquared = []
+    YMinusmeanYSquared = []
+    
+    #Defining means for both variables 
+    meanY = np.mean(Y)
+    meanX = np.mean(X)
+    
+    #Subtracting each value of X with its mean
+    for x in X:
+        XMinusmeanX.append(x - meanX)
+    
+    #Substracting each value of Y with its mean
+    for y in Y:
+        YMinusmeanY.append(y - meanY)
+    
+    #Multiplying the differences between each variable and their means 
+    for y,x in zip(YMinusmeanY,XMinusmeanX):
+        prods.append(y * x)
+    
+    #Squaring differences between X and its mean
+    for i in XMinusmeanX:
+        XMinusmeanXSquared.append(i ** 2)
+    
+    #Squaring differences between Y and its mean
+    for i in YMinusmeanY:
+        YMinusmeanYSquared.append(i ** 2)
+    
+    #Numerator for slope formula 
+    numerator = sum(prods)
+    
+    #Denominator for slope formula 
+    denominator = sum(XMinusmeanXSquared)    
+     
+    #Slope
+    betaHat = numerator / denominator 
+    
+    #Intercept
+    alphaHat = meanY - (betaHat * meanX) 
+    
+    #Pearson's correlation coefficient (r)
+    r = corr(Y,X)
+    
+    
+    print('Corr = ', round(r,2), '(Degree of linear association between X and Y)') 
+    print()#Creating space in final output 
+    print('slope = ', round(betaHat,2)) 
+    print()#Creating space in final output 
+    print('Intercept = ', round(alphaHat,2))
+    print()#Creating space in final output 
+    print('The Regression equation is: y =', round(alphaHat,2),'+',round(betaHat,2),'(X)')
+    
+    #Plot
+    import pylab as py #Library for plotting
+
+    (m,b) = py.polyfit(X,Y,1)
+    
+    yp = py.polyval([m,b],X)
+    
+    py.plot(X,yp, 'r', alpha = 0.8)
+    py.scatter(X,Y, c='black', alpha=0.6)
+    py.title('Scatter plot X vs. Y with regression line')
+    py.xlabel('X')
+    py.ylabel('Y')
+    
+
+
+#Least Squares function for X and Y (k = 2)
+def doubleLreg(Y,X1,X2):
+    'This function calculates the Least Squares regression coefficients for bivariate analysis. The First argument is the dependent variable, the second and third arguments are the independent variables.'
+    print()#creating space in final output 
+    import numpy as np #Library for mean function
+    
+    #Calculating means for all attributes
+    meanY = np.mean(Y)
+    meanX1 = np.mean(X1)
+    meanX2 = np.mean(X2)
+    N = len(Y)
+    #Calculations for coefficients 
+    
+    #Sum of Squares X1 
+    X1delta = []
+    X1deltaSquared = []
+    for x in X1:
+        X1delta.append(x - meanX1)
+    for x in X1delta:
+        X1deltaSquared.append(x ** 2)
+    
+    ssX1 = sum(X1deltaSquared)
+        
+    #Sum of squares X2
+    X2delta = []
+    X2deltaSquared = []
+    for x in X2:
+        X2delta.append(x - meanX2)
+    for x in X2delta:
+        X2deltaSquared.append(x ** 2)
+    
+    ssX2 = sum(X2deltaSquared)
+    
+    #Sum X1 times Y
+    X1timesY = []
+    for x,y in zip(X1,Y):
+        X1timesY.append(x * y)
+    
+    sumX1timesY = (sum(X1timesY)) - ((sum(X1) * sum(Y)) / N)
+    
+    #Sum X2 times Y
+    X2timesY = []
+    for x,y in zip(X2,Y):
+        X2timesY.append(x * y)
+        
+    sumX2timesY = (sum(X2timesY)) - ((sum(X2) * sum(Y)) / N)
+    
+    #Sum X1 times X2
+    X1timesX2 = []
+    for i,j in zip(X1,X2):
+        X1timesX2.append(i * j)
+        
+    sumX1timesX2 = (sum(X1timesX2)) - ((sum(X1) * sum(X2)) / N)
+    
+    #Sum X1 times X2 squared
+    sumX1timesX2squared = sumX1timesX2 ** 2
+    
+    #Beta1
+    b1 = ((ssX2 * sumX1timesY) - (sumX1timesX2 * sumX2timesY)) / ((ssX1 * ssX2) - sumX1timesX2squared)
+    
+    #Beta2
+    b2 = ((ssX1 * sumX2timesY) - (sumX1timesX2 * sumX1timesY)) / ((ssX1 * ssX2) - sumX1timesX2squared)    
+    
+    #Intercept
+    a = meanY - (b1 * meanX1) - (b2 * meanX2)
+    
+    #Pearson's correlation coefficient (r)
+    r1 = corr(Y,X1)
+    r2 = corr(Y,X2)
+   
+    
+    print('Corr X1,Y= ', round(r1,2), '(Degree of linear association between Y and X1)') 
+    print()#Creating space in final output 
+    print('Corr X2,Y= ', round(r2,2), '(Degree of linear association between Y and X2)') 
+    print()#Creating space in final output 
+    print('X1 = ', round(b1,2)) 
+    print()#Creating space in final output
+    print('X2 = ', round(b2,2)) 
+    print()#Creating space in final output 
+    print('Intercept = ', round(a,2))
+    print()#Creating space in final output 
+    print('The Regression equation is: y =', round(a,2), '+',round(b1,2),'(x1) +', round(b2,2), '(x2)')
